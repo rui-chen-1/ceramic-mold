@@ -1,0 +1,149 @@
+# Sveltia CMS settings for the admin page (https://rui-chen-1.github.io/ceramic-mold/admin/).
+# Edit, hide and delete posts and photos. Uploading is switched off on purpose: photos go in from the Mac
+# (tools/publish.py, tools/pool.py), which remove location data first.
+# Docs: https://sveltiacms.app/en/docs
+
+backend:
+  name: github
+  repo: rui-chen-1/ceramic-mold-source
+  branch: main
+
+site_url: https://rui-chen-1.github.io/ceramic-mold/
+display_url: https://rui-chen-1.github.io/ceramic-mold/
+
+# The asset library shows the photo pool, where pool photos can be deleted.
+media_folder: assets/pool
+public_folder: /pool
+
+# No uploads: a 1-byte limit refuses every file. (Sveltia has no switch to hide the upload button.)
+media_libraries:
+  default:
+    config:
+      max_file_size: 1
+
+output:
+  omit_empty_optional_fields: true
+
+collections:
+  - name: notes
+    label: Notes
+    label_singular: Note
+    folder: content/notes
+    path: "{{slug}}/index"
+    slug:
+      template: "{{year}}-{{month}}-{{day}}-{{hour}}{{minute}}"
+      editable: false
+    media_folder: ""
+    public_folder: ""
+    create: true
+    delete: true
+    summary: "{{date}} · {{title}}"
+    sortable_fields:
+      fields: [date, title]
+      default:
+        field: date
+        direction: descending
+    view_filters:
+      - label: Hidden
+        field: draft
+        pattern: true
+    editor:
+      preview: false
+    fields:
+      - { name: title, label: Title, widget: string, required: false, hint: "Only shows in the browser tab and link previews." }
+      - { name: date, label: Date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ", default: "{{now}}" }
+      - { name: draft, label: Hidden from the site, widget: boolean, default: false, required: false, hint: "Hidden notes are still readable in the public GitHub repository." }
+      - { name: pool, label: Pool photos, widget: list, required: false, hint: "4-letter IDs (the file names under Assets), up to four photos in all." }
+      - { name: body, label: Text, widget: markdown, modes: [raw], required: false, hint: "A YouTube, Bilibili, Spotify, Rednote or Douban link on its own line becomes a player or a card." }
+
+  - name: essays
+    label: Essays
+    label_singular: Essay
+    folder: content/essays
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    create: true
+    delete: true
+    summary: "{{title}}"
+    sortable_fields:
+      fields: [date, title]
+      default:
+        field: date
+        direction: descending
+    view_filters:
+      - label: Hidden
+        field: draft
+        pattern: true
+    editor:
+      preview: false
+    fields:
+      - { name: title, label: Title, widget: string, hint: "Sentence case." }
+      - { name: dek, label: Subtitle (dek), widget: string, required: false }
+      - { name: date, label: Date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ", default: "{{now}}" }
+      - { name: kind, label: Label above the title, widget: string, default: Essay, required: false }
+      - { name: tags, label: Tags, widget: list, required: false, hint: "Lower case, separated by commas." }
+      - { name: draft, label: Hidden from the site, widget: boolean, default: true, required: false, hint: "Hidden essays are still readable in the public GitHub repository." }
+      - { name: body, label: Text, widget: markdown, modes: [raw] }
+
+  - name: photographs
+    label: Photographs
+    label_singular: Series
+    folder: content/photographs
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    create: false
+    delete: true
+    summary: "{{title}}"
+    editor:
+      preview: false
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: dek, label: Subtitle (dek), widget: string, required: false }
+      - { name: date, label: Date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - { name: cover, label: Cover photo file name, widget: string, required: false, hint: "For example 01-*" }
+      - { name: coverAlt, label: Cover description, widget: string, required: false }
+      - { name: draft, label: Hidden from the site, widget: boolean, default: false, required: false }
+      - { name: body, label: Text, widget: markdown, modes: [raw], required: false }
+
+  - name: pages
+    label: Pages
+    editor:
+      preview: false
+    files:
+      - name: home
+        label: Home page
+        file: content/_index.md
+        fields:
+          - { name: title, label: Name, widget: string }
+          - { name: label, label: Line under the name, widget: string, required: false }
+          - { name: body, label: Introduction, widget: markdown, modes: [raw] }
+      - name: about
+        label: About
+        file: content/about/index.md
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: colophon, label: Colophon, widget: string, required: false }
+          - name: elsewhere
+            label: Elsewhere links
+            widget: list
+            required: false
+            fields:
+              - { name: name, label: Name, widget: string }
+              - { name: url, label: Link, widget: string }
+              - { name: note, label: One line, widget: string, required: false }
+              - { name: external, label: External, widget: boolean, default: true, required: false }
+          - { name: body, label: Text, widget: markdown, modes: [raw] }
+      - name: essays_index
+        label: Essays page
+        file: content/essays/_index.md
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: description, label: One-line description, widget: string, required: false }
+      - name: photographs_index
+        label: Photographs page
+        file: content/photographs/_index.md
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: description, label: One-line description, widget: string, required: false }
